@@ -22,19 +22,5 @@ module.exports = {
                 );
             });
         });
-    },
-    existeToken: (token) => {
-        return new Promise((resolve, reject) => {
-            conn.then(client => {
-                client.db().collection(config.USUARIOS).findOne(
-                    { token: token },
-                    (err, document) => {
-                        if(err) reject(err);
-                        else if (!document) resolve(document);
-                        else resolve(document);
-                    }
-                );
-            });
-        });
     }
 };

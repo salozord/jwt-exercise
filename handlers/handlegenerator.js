@@ -1,7 +1,7 @@
 let jwt = require( 'jsonwebtoken' );
-let config = require( './config' );
-let conn = require('./utilities/dbconn');
-let security = require('./utilities/security');
+let config = require( '../config' );
+let conn = require('../utilities/dbconn');
+let security = require('../utilities/security');
 
 // Clase encargada de la creación del token
 class HandlerGenerator {
@@ -30,29 +30,14 @@ class HandlerGenerator {
             else {
 
                 // Se genera un nuevo token para el nombre de usuario el cuál expira en 24 horas
-                let token = jwt.sign( { username: username },
+                let token = jwt.sign( { username: doc.username, rol: doc.rol },
                 config.secret, { expiresIn: '24h' } );
-                conn.then(client => {
-                    client.db().collection(config.USUARIOS).findOneAndUpdate(
-                        {username: username, password: password},
-                        { $set: { token: token } },
-                        (err, r) => {
-                            if (err) {
-                                res.send(500).json({
-                                    success: false,
-                                    message: `Error while updating the token into the database: ${err}`
-                                });
-                            }
-                            else {
-                                // Retorna el token el cuál debe ser usado durante las siguientes solicitudes
-                                res.send(200).json({
-                                    success: true,
-                                    message: 'Successfully added token to user',
-                                    token: token
-                                });
-                            } 
-                        }
-                    )
+                
+                // Retorna el token el cuál debe ser usado durante las siguientes solicitudes
+                res.send(200).json({
+                    success: true,
+                    message: 'Successfully added token to user',
+                    token: token
                 });
             } 
         })
