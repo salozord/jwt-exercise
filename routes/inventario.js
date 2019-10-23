@@ -9,5 +9,6 @@ HandlerInventario = new HandlerInventario();
 router.get('/', middleware.checkToken, HandlerInventario.getAll);
 router.post('/', middleware.checkToken, HandlerInventario.insertOne);
 router.get('/:id', middleware.checkToken, HandlerInventario.getOne);
+router.delete('/:id', middleware.checkToken, HandlerInventario.deleteOne);
 
 module.exports = router;

@@ -109,6 +109,38 @@ class HandlerInventario {
         }
     }
 
+    deleteOne(req, res) {
+        let nombre = req.params.id;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN;
+        if(puedeAcceder) {
+            conn.then( client => {
+                client.db().collection(config.INVENTARIO).deleteOne(
+                    { name: nombre },
+                    (err, r) => {
+                        if (err) {
+                            res.status(500).json({
+                                succes: false,
+                                message: `An error occured while deleting data: ${err}`
+                            });
+                        }
+                        else {
+                            res.status(200).json({
+                                success: true,
+                                message: 'data deleted successfully!',
+                                data: r.result
+                            });
+                        }
+                    }
+                );
+            });
+        }
+        else {
+            res.status(403).json({
+                success: false,
+                message: 'Your role is not allowed to do this request'
+            });
+        }
+    }
 }
 
 module.exports = HandlerInventario;

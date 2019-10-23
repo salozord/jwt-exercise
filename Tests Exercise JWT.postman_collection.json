@@ -1,0 +1,1032 @@
+{
+	"info": {
+		"_postman_id": "2abb203c-d632-4a58-984a-60a56424038a",
+		"name": "Tests Exercise JWT",
+		"description": "Postman tests collection to see the functionalities of the JWT exercise.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Index",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "44d8c572-92dc-47db-a768-55dd783a7294",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el index\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000"
+				},
+				"description": "Verifies that the app is working."
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar Usuario Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "308cdf10-1a5f-4304-935f-2bb6383ba483",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el registro\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;",
+							"postman.setGlobalVariable(\"admin\", body.data.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"ssalazara\",\n\t\"password\": \"ultrasecretpass\",\n\t\"rol\": \"ADMIN\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/registro",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"registro"
+					]
+				},
+				"description": "Request to register an admin user into the system and obtain his jwt for future requests."
+			},
+			"response": []
+		},
+		{
+			"name": "Login usuario Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "105b3f3d-1dd7-4377-abe1-1147e1900806",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el login\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;\r",
+							"tests[\"La respuesta contiene el token\"] = body.token;\r",
+							"postman.setGlobalVariable(\"token\", body.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{admin}}\",\n\t\"password\": \"ultrasecretpass\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"login"
+					]
+				},
+				"description": "Logs in the admin user created previously."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar escritura en 'inventario'",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "05f7737a-3219-47e3-8860-ce773315f44b",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el post al inventario\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;\r",
+							"postman.setGlobalVariable(\"producto\", body.data.name);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"nuevo_producto\",\n\t\"quantity\": 2500\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Verifies if the ADMIN role is able to write in the collection 'inventario' which he can only access to write if he's ADMIN."
+			},
+			"response": []
+		},
+		{
+			"name": "Get todo el inventario",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8e8f6c7a-6fc9-47a2-8b43-953dd1943c82",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el get all inventario\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Retrieves all the 'inventario' collection to see the changes."
+			},
+			"response": []
+		},
+		{
+			"name": "Get de todo inventario sin proveer token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6855f9d4-e64c-4844-81e6-0db7fccce010",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el get all de inventario sin token\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba al no proveer el token\"] = !body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Tries to retrieve the inventory without token."
+			},
+			"response": []
+		},
+		{
+			"name": "Get usuarios como admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2d6feace-8865-486a-9024-c1e0628aacc7",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el getAll de usuarios\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				},
+				"description": "Get all users as an admin."
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar producto inventario",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "06627b83-2999-4986-ad98-c2e48a71ce27",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el delete de inventario\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/inventario/{{producto}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario",
+						"{{producto}}"
+					]
+				},
+				"description": "Deletes the product that has been created."
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar usuario SENIOR",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "49a0eef5-5aa2-43d4-99a3-05a45e94315d",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el registro nuevo\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;",
+							"postman.setGlobalVariable(\"senior\", body.data.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"ccpena\",\n\t\"password\": \"contrasenia\",\n\t\"rol\": \"SENIOR\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/registro",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"registro"
+					]
+				},
+				"description": "Registers a new user with the role SENIOR."
+			},
+			"response": []
+		},
+		{
+			"name": "Login Usuario Senior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f9650d2f-ba6d-428e-a74a-4a5663cf84cf",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el login nuevo\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;\r",
+							"tests[\"La respuesta contiene el token nuevo de SENIOR\"] = body.token;\r",
+							"postman.setGlobalVariable(\"tokenS\", body.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{senior}}\",\n\t\"password\": \"contrasenia\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"login"
+					]
+				},
+				"description": "ogs in a SENIOR-role user."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar NO escritura en 'inventario'",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "05f7737a-3219-47e3-8860-ce773315f44b",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"Está bloqueado de realizar esto por su rol\"] = responseCode.code === 403;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = !body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenS}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"intento_escritura\",\n\t\"quantity\": 3000\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Verifies if the ADMIN role is able to write in the collection 'inventario' which he can only access to write if he's ADMIN."
+			},
+			"response": []
+		},
+		{
+			"name": "Get todo el inventario como senior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8e8f6c7a-6fc9-47a2-8b43-953dd1943c82",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el get all inventario\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenS}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Retrieves all the 'inventario' collection to see the changes."
+			},
+			"response": []
+		},
+		{
+			"name": "Get usuarios como senior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2d6feace-8865-486a-9024-c1e0628aacc7",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el getAll de usuarios como senior\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenS}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				},
+				"description": "Get all users as an admin."
+			},
+			"response": []
+		},
+		{
+			"name": "Insertar usuario como senior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "49a0eef5-5aa2-43d4-99a3-05a45e94315d",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el insertar nuevo\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;",
+							"postman.setGlobalVariable(\"junior\", body.data.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenS}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"fjgonzalez\",\n\t\"password\": \"1234\",\n\t\"rol\": \"JUNIOR\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				},
+				"description": "Registers a new user with the role SENIOR."
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar usuario Senior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bc827a2d-9a03-4b22-8280-95ecc4b291fa",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el delete\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;",
+							"postman.setGlobalVariable(\"tokenS\", undefined);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{senior}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{senior}}"
+					]
+				},
+				"description": "Deletes the ADMIN user from the database."
+			},
+			"response": []
+		},
+		{
+			"name": "Login Usuario Junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f9650d2f-ba6d-428e-a74a-4a5663cf84cf",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el login nuevo\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;\r",
+							"tests[\"La respuesta contiene el token nuevo de JUNIOR\"] = body.token;\r",
+							"postman.setGlobalVariable(\"tokenJ\", body.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{junior}}\",\n\t\"password\": \"1234\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"login"
+					]
+				},
+				"description": "ogs in a SENIOR-role user."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar NO escritura en 'inventario' como junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "05f7737a-3219-47e3-8860-ce773315f44b",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"Está bloqueado de realizar esto por su rol\"] = responseCode.code === 403;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = !body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenJ}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"intento_junior\",\n\t\"quantity\": 4000\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Verifies if the ADMIN role is able to write in the collection 'inventario' which he can only access to write if he's ADMIN."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar NO inserción de usuarios como Junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "49a0eef5-5aa2-43d4-99a3-05a45e94315d",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No esta permitido de hacer esta operación\"] = responseCode.code === 403;",
+							"tests[\"Es la respuesta que se esperaba\"] = !body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenJ}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"nuevito\",\n\t\"password\": \"aabbcc\",\n\t\"rol\": \"JUNIOR\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				},
+				"description": "Registers a new user with the role SENIOR."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar NO lectura de inventario como junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8e8f6c7a-6fc9-47a2-8b43-953dd1943c82",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No está autorizado de realzar esta operación\"] = responseCode.code === 403;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = !body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenJ}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/inventario",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"inventario"
+					]
+				},
+				"description": "Retrieves all the 'inventario' collection to see the changes."
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar lectura de usuarios como junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2d6feace-8865-486a-9024-c1e0628aacc7",
+						"exec": [
+							"let body = JSON.parse(responseBody);\r",
+							"tests[\"No genera error en el getAll de usuarios como junior\"] = responseCode.code === 200;\r",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenJ}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios"
+					]
+				},
+				"description": "Get all users as an admin."
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar usuario Junior",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bc827a2d-9a03-4b22-8280-95ecc4b291fa",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el delete\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success;",
+							"postman.setGlobalVariable(\"tokenJ\", undefined);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{junior}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{junior}}"
+					]
+				},
+				"description": "Deletes the ADMIN user from the database."
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar usuario Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bc827a2d-9a03-4b22-8280-95ecc4b291fa",
+						"exec": [
+							"let body = JSON.parse(responseBody);",
+							"tests[\"No genera error en el delete del admin\"] = responseCode.code === 200;",
+							"tests[\"Es la respuesta que se esperaba\"] = body.success === true;",
+							"postman.setGlobalVariable(\"token\", undefined);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/usuarios/{{admin}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"usuarios",
+						"{{admin}}"
+					]
+				},
+				"description": "Deletes the ADMIN user from the database."
+			},
+			"response": []
+		}
+	]
+}

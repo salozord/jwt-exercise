@@ -89,7 +89,11 @@ class HandlerGenerator {
                             else {
                                 res.status(200).json({
                                     success: true,
-                                    message: 'Successfully created new user'
+                                    message: 'Successfully created new user',
+                                    data: {
+                                        username: username,
+                                        rol: rol
+                                    }
                                 });
                             }
                         }

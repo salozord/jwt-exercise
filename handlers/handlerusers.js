@@ -8,7 +8,7 @@ class HandlerUsers {
         let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR || req.decoded.rol === config.roles.JUNIOR;
         if(puedeAcceder) {
             conn.then( client => {
-                client.db().collection(config.USUARIOS).find({}, { _id: 0, password: 0, username: 1, rol: 1})
+                client.db().collection(config.USUARIOS).find({}).project({ _id: 0, password: 0 })
                 .toArray((err, data) => {
                     if (err) {
                         res.status(500).json({
@@ -110,6 +110,38 @@ class HandlerUsers {
         }
     }
 
+    deleteOne(req, res) {
+        let usr = req.params.id;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN;
+        if(puedeAcceder) {
+            conn.then( client => {
+                client.db().collection(config.USUARIOS).deleteOne(
+                    { username: usr },
+                    (err, r) => {
+                        if (err) {
+                            res.status(500).json({
+                                succes: false,
+                                message: `An error occured while deleting data: ${err}`
+                            });
+                        }
+                        else {
+                            res.status(200).json({
+                                success: true,
+                                message: 'data deleted successfully!',
+                                data: r.result
+                            });
+                        }
+                    }
+                );
+            });
+        }
+        else {
+            res.status(403).json({
+                success: false,
+                message: 'Your role is not allowed to do this request'
+            });
+        }
+    }
 }
 
 module.exports = HandlerUsers;
