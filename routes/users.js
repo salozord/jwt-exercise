@@ -1,9 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+var HandlerUsers = require("../handlers/handlerusers");
+var middleware = require("../middleware");
+
+HandlerUsers = new HandlerUsers();
+
+router.get('/', middleware.checkToken, HandlerUsers.getAll);
+router.post('/', middleware.checkToken, HandlerUsers.insertOne);
+router.get('/:id', middleware.checkToken, HandlerUsers.getOne);
 
 module.exports = router;

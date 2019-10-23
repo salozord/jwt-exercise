@@ -1,14 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-var HandlerGenerator = require("../handlegenerator.js");
+var HandlerInventario = require("../handlers/handlerinventario.js");
 var middleware = require("../middleware.js");
 
-HandlerGenerator = new HandlerGenerator();
+HandlerInventario = new HandlerInventario();
 
-/* GET home page. */
-router.get('/', middleware.checkToken, HandlerGenerator.index);
-router.post('/login', HandlerGenerator.login);
-router.post('/registro', HandlerGenerator.registro);
+router.get('/', middleware.checkToken, HandlerInventario.getAll);
+router.post('/', middleware.checkToken, HandlerInventario.insertOne);
+router.get('/:id', middleware.checkToken, HandlerInventario.getOne);
 
 module.exports = router;

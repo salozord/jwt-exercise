@@ -1,13 +1,13 @@
 let config = require( '../config' );
 let conn = require('../utilities/dbconn');
 
-class HandlerInventario {
+class HandlerUsers {
 
     getAll(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR && req.decode.rol === config.roles.JUNIOR;
         if(puedeAcceder) {
             conn.then( client => {
-                client.db().collection(config.INVENTARIO).find({})
+                client.db().collection(config.USUARIOS).find({})
                 .toArray((err, data) => {
                     if (err) {
                         res.status(500).json({
@@ -34,12 +34,12 @@ class HandlerInventario {
     }
 
     getOne(req, res) {
-        let nombre = req.params.id;
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        let usr = req.params.id;
+        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR && req.decode.rol === config.roles.JUNIOR;
         if(puedeAcceder) {
             conn.then( client => {
                 client.db().collection(config.INVENTARIO).findOne(
-                    { name: nombre },
+                    { username: usr },
                     (err, r) => {
                         if (err) {
                             res.status(500).json({
@@ -67,22 +67,22 @@ class HandlerInventario {
     }
 
     insertOne(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN;
-        
-        if(!req.body.name || !req.body.quantity) {
+        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        if(!req.body.username || !req.body.password || !req.body.rol) {
             res.status(400).json({
                 success: false,
                 message: 'Wrong data, please check your request'
             });
         }
         else if(puedeAcceder) {
-            let producto = {
-                name: req.body.name,
-                quantity: req.body.quantity
+            let usuario = {
+                username: req.body.username,
+                password: req.body.password,
+                rol: req.body.rol
             };
             conn.then( client => {
                 client.db().collection(config.INVENTARIO).insertOne(
-                    producto,
+                    usuario,
                     (err, r) => {
                         if (err) {
                             res.status(500).json({
@@ -111,4 +111,4 @@ class HandlerInventario {
 
 }
 
-module.exports = HandlerInventario;
+module.exports = HandlerUsers;

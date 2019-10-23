@@ -21,7 +21,7 @@ class HandlerGenerator {
         security.existeUsuario(username, password)
         .then( doc => {
             if(!doc) {
-                res.send( 403 ).json({
+                res.status( 403 ).json({
                     success: false,
                     message: 'Incorrect username or password'
                 });
@@ -34,7 +34,7 @@ class HandlerGenerator {
                 config.secret, { expiresIn: '24h' } );
                 
                 // Retorna el token el cuál debe ser usado durante las siguientes solicitudes
-                res.send(200).json({
+                res.status(200).json({
                     success: true,
                     message: 'Successfully added token to user',
                     token: token
@@ -42,7 +42,7 @@ class HandlerGenerator {
             } 
         })
         .catch( err => {
-            res.send( 500 ).json({
+            res.status( 500 ).json({
                 success: false,
                 message: `Authentication failed! There was an error during the process: ${err}`
             });
@@ -50,7 +50,7 @@ class HandlerGenerator {
     } else {
 
       // El error 400 corresponde a Bad Request de acuerdo al estándar HTTP
-      res.send( 400 ).json({
+      res.status( 400 ).json({
         success: false,
         message: 'Authentication failed! Please check the request'
       });
@@ -59,7 +59,7 @@ class HandlerGenerator {
 
   index( req, res ) {
     // Retorna una respuesta exitosa con previa validación del token
-    res.send(200).json({
+    res.status(200).json({
       success: true,
       message: 'Index page'
     });
@@ -78,16 +78,16 @@ class HandlerGenerator {
             if(!doc) {
                 conn.then( client => {
                     client.db().collection(config.USUARIOS).insertOne(
-                        { username: username, password: password, rol: rol, token: undefined },
+                        { username: username, password: password, rol: rol },
                         (err, r) => {
                             if (err) {
-                                res.send(500).json({
+                                res.status(500).json({
                                     success: false,
                                     message: `Error while inserting new user into the database: ${err}`
                                 });
                             }
                             else {
-                                res.send(200).json({
+                                res.status(200).json({
                                     success: true,
                                     message: 'Successfully created new user'
                                 });
@@ -97,21 +97,21 @@ class HandlerGenerator {
                 });
             }
             else {
-                res.send( 403 ).json({
+                res.status( 403 ).json({
                     success: false,
                     message: 'User already registered, please log in!'
                 });
             }
         })
         .catch( err => {
-            res.send( 500 ).json({
+            res.status( 500 ).json({
                 success: false,
                 message: `Authentication failed! There was an error during the process: ${err}`
             });
         });
     }
     else {
-        res.send( 400 ).json({
+        res.status( 400 ).json({
             success: false,
             message: 'Authentication failed! Please check the request'
         });
