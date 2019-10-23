@@ -4,7 +4,7 @@ let conn = require('../utilities/dbconn');
 class HandlerInventario {
 
     getAll(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR;
         if(puedeAcceder) {
             conn.then( client => {
                 client.db().collection(config.INVENTARIO).find({})
@@ -35,7 +35,7 @@ class HandlerInventario {
 
     getOne(req, res) {
         let nombre = req.params.id;
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR;
         if(puedeAcceder) {
             conn.then( client => {
                 client.db().collection(config.INVENTARIO).findOne(
@@ -67,7 +67,7 @@ class HandlerInventario {
     }
 
     insertOne(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN;
         
         if(!req.body.name || !req.body.quantity) {
             res.status(400).json({
@@ -94,7 +94,7 @@ class HandlerInventario {
                             res.status(200).json({
                                 success: true,
                                 message: 'data inserted successfully!',
-                                data: r
+                                data: r.ops[0]
                             });
                         }
                     }

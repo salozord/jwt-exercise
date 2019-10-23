@@ -1,13 +1,14 @@
 let config = require( '../config' );
 let conn = require('../utilities/dbconn');
+let security = require('../utilities/security');
 
 class HandlerUsers {
 
     getAll(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR && req.decode.rol === config.roles.JUNIOR;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR || req.decoded.rol === config.roles.JUNIOR;
         if(puedeAcceder) {
             conn.then( client => {
-                client.db().collection(config.USUARIOS).find({})
+                client.db().collection(config.USUARIOS).find({}, { _id: 0, password: 0, username: 1, rol: 1})
                 .toArray((err, data) => {
                     if (err) {
                         res.status(500).json({
@@ -35,10 +36,10 @@ class HandlerUsers {
 
     getOne(req, res) {
         let usr = req.params.id;
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR && req.decode.rol === config.roles.JUNIOR;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR || req.decoded.rol === config.roles.JUNIOR;
         if(puedeAcceder) {
             conn.then( client => {
-                client.db().collection(config.INVENTARIO).findOne(
+                client.db().collection(config.USUARIOS).findOne(
                     { username: usr },
                     (err, r) => {
                         if (err) {
@@ -67,7 +68,7 @@ class HandlerUsers {
     }
 
     insertOne(req, res) {
-        let puedeAcceder = req.decode.rol === config.roles.ADMIN && req.decode.rol === config.roles.SENIOR;
+        let puedeAcceder = req.decoded.rol === config.roles.ADMIN || req.decoded.rol === config.roles.SENIOR;
         if(!req.body.username || !req.body.password || !req.body.rol) {
             res.status(400).json({
                 success: false,
@@ -77,11 +78,11 @@ class HandlerUsers {
         else if(puedeAcceder) {
             let usuario = {
                 username: req.body.username,
-                password: req.body.password,
+                password: security.esconder(req.body.password),
                 rol: req.body.rol
             };
             conn.then( client => {
-                client.db().collection(config.INVENTARIO).insertOne(
+                client.db().collection(config.USUARIOS).insertOne(
                     usuario,
                     (err, r) => {
                         if (err) {
@@ -94,7 +95,7 @@ class HandlerUsers {
                             res.status(200).json({
                                 success: true,
                                 message: 'data inserted successfully!',
-                                data: r
+                                data: r.ops[0]
                             });
                         }
                     }

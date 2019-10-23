@@ -1,10 +1,10 @@
 const crypto = require('crypto');
 const config = require('../config');
 let conn = require('./dbconn');
-const hasher = crypto.createHash('sha256');
 
 module.exports = {
     esconder: (data) => {
+        const hasher = crypto.createHash('sha256');
         const plusSalt = data + config.salt;
         hasher.update(plusSalt);
         return hasher.digest('hex');
