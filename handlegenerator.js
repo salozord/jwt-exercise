@@ -7,7 +7,6 @@ let security = require('./utilities/security');
 class HandlerGenerator {
 
   login( req, res ) {
-    
     // Extrae el usuario y la contraseña especificados en el cuerpo de la solicitud
     let username = req.body.username;
     let password = req.body.password;
@@ -28,31 +27,37 @@ class HandlerGenerator {
                 });
             }
             // Si los usuarios y las contraseñas coinciden, proceda con la generación del token
-            // de lo contrario, un mensaje de error es retornado
-            if( username === doc.username && password === doc.password ) {
-            
+            else {
+
                 // Se genera un nuevo token para el nombre de usuario el cuál expira en 24 horas
                 let token = jwt.sign( { username: username },
                 config.secret, { expiresIn: '24h' } );
-                
-                // Retorna el token el cuál debe ser usado durante las siguientes solicitudes
-                res.json({
-                    success: true,
-                    message: 'Authentication successful!',
-                    token: token
+                conn.then(client => {
+                    client.db().collection(config.USUARIOS).findOneAndUpdate(
+                        {username: username, password: password},
+                        { $set: { token: token } },
+                        (err, r) => {
+                            if (err) {
+                                res.send(500).json({
+                                    success: false,
+                                    message: `Error while updating the token into the database: ${err}`
+                                });
+                            }
+                            else {
+                                // Retorna el token el cuál debe ser usado durante las siguientes solicitudes
+                                res.send(200).json({
+                                    success: true,
+                                    message: 'Successfully added token to user',
+                                    token: token
+                                });
+                            } 
+                        }
+                    )
                 });
-    
-            } else { 
-                // El error 403 corresponde a Forbidden (Prohibido) de acuerdo al estándar HTTP
-                res.send( 403 ).json({
-                success: false,
-                message: 'Incorrect username or password'
-                });
-        
-            }
+            } 
         })
         .catch( err => {
-            res.send( 400 ).json({
+            res.send( 500 ).json({
                 success: false,
                 message: `Authentication failed! There was an error during the process: ${err}`
             });
@@ -68,12 +73,64 @@ class HandlerGenerator {
   }
 
   index( req, res ) {
-    
     // Retorna una respuesta exitosa con previa validación del token
     res.send(200).json({
       success: true,
       message: 'Index page'
     });
+  }
+
+  registro( req, res ) {
+    // Extrae el usuario y la contraseña especificados en el cuerpo de la solicitud
+    let username = req.body.username;
+    let password = req.body.password;
+    let rol = req.body.rol;
+
+    if( username && password && rol) {
+        password = security.esconder(password);
+        security.existeUsuario(username, password)
+        .then( doc => {
+            if(!doc) {
+                conn.then( client => {
+                    client.db().collection(config.USUARIOS).insertOne(
+                        { username: username, password: password, rol: rol, token: undefined },
+                        (err, r) => {
+                            if (err) {
+                                res.send(500).json({
+                                    success: false,
+                                    message: `Error while inserting new user into the database: ${err}`
+                                });
+                            }
+                            else {
+                                res.send(200).json({
+                                    success: true,
+                                    message: 'Successfully created new user'
+                                });
+                            }
+                        }
+                    );
+                });
+            }
+            else {
+                res.send( 403 ).json({
+                    success: false,
+                    message: 'User already registered, please log in!'
+                });
+            }
+        })
+        .catch( err => {
+            res.send( 500 ).json({
+                success: false,
+                message: `Authentication failed! There was an error during the process: ${err}`
+            });
+        });
+    }
+    else {
+        res.send( 400 ).json({
+            success: false,
+            message: 'Authentication failed! Please check the request'
+        });
+    }
   }
 }
 
